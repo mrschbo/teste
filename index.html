@@ -55,28 +55,19 @@
             box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
         }
 
-        #image-link {
-            width: 80%; /* Ajusta a largura do campo de link */
-            padding: 10px; /* Adiciona padding para o campo de entrada */
-            margin: 10px 0; /* Espaço entre o campo de entrada e o upload */
-            border-radius: 5px; /* Arredonda os cantos do campo de entrada */
-            border: 1px solid #CCCCCC; /* Borda do campo de entrada */
-        }
-
         #check-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 15px 30px; /* Aumenta o padding para deixar o botão maior */
-            font-size: 20px; /* Aumenta o tamanho da fonte */
-            border-radius: 20px; /* Arredonda os cantos */
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 10px;
             cursor: pointer;
             margin-top: 20px;
-            transition: background-color 0.3s; /* Adiciona uma transição suave para a mudança de cor */
         }
 
         #check-btn:hover {
-            background-color: #45a049; /* Cor do botão ao passar o mouse */
+            background-color: #45a049;
         }
 
         #result {
@@ -101,10 +92,9 @@
     </div>
 
     <div class="upload-box" id="upload-box">
-        Arraste sua imagem ou coloque o link
+        Arraste sua imagem
         <br>
-        <input type="file" id="image-input" style="display:none;">
-        <input type="text" id="image-link" placeholder="Cole o link da imagem aqui">
+        <input type="file" id="image-input">
         <img id="uploaded-img" alt="Imagem Carregada">
     </div>
 
@@ -170,7 +160,6 @@
                 reader.onload = function(event) {
                     uploadedImg.src = event.target.result;
                     uploadedImg.style.display = 'block'; // Mostrar a imagem
-                    document.getElementById('image-link').value = ''; // Limpa o campo de link
                 };
                 reader.readAsDataURL(file);
             }
@@ -178,22 +167,13 @@
 
         // Quando o usuário clica no botão
         document.getElementById('check-btn').addEventListener('click', function() {
-            const link = document.getElementById('image-link').value;
-
-            if (link) {
-                uploadedImg.src = link; // Define a imagem com o link
-                uploadedImg.style.display = 'block'; // Mostra a imagem
-                const imageColors = getImageColors(uploadedImg);
-
-                const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
-                document.getElementById('result').textContent = result;
-            } else if (uploadedImg.complete && uploadedImg.src) {
+            if (uploadedImg.complete && uploadedImg.src) {
                 const imageColors = getImageColors(uploadedImg);
 
                 const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
                 document.getElementById('result').textContent = result;
             } else {
-                alert('Por favor, carregue uma imagem ou cole um link.');
+                alert('Por favor, carregue uma imagem primeiro.');
             }
         });
 
