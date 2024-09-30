@@ -17,7 +17,6 @@
             margin-bottom: 20px;
         }
 
-        /* Estilizando os círculos de cor */
         .palette {
             margin-bottom: 30px;
         }
@@ -31,7 +30,6 @@
             box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Caixa de upload/link */
         .upload-box {
             background-color: #EDEDED;
             border: 2px dashed #CCCCCC;
@@ -48,34 +46,39 @@
             padding: 20px;
         }
 
-        /* Campo de link */
-        .upload-box input[type="file"],
-        .upload-box input[type="url"] {
+        .upload-box img {
+            display: none; /* Oculta a imagem inicialmente */
+            max-width: 100%;
             margin-top: 10px;
-            font-size: 14px;
-            padding: 8px;
-            width: 90%;
-            border: 1px solid #CCCCCC;
+            border: 2px solid #CCCCCC;
             border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
         }
 
-        /* Botão "Combina?" */
+        #image-link {
+            width: 80%; /* Ajusta a largura do campo de link */
+            padding: 10px; /* Adiciona padding para o campo de entrada */
+            margin: 10px 0; /* Espaço entre o campo de entrada e o upload */
+            border-radius: 5px; /* Arredonda os cantos do campo de entrada */
+            border: 1px solid #CCCCCC; /* Borda do campo de entrada */
+        }
+
         #check-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 18px;
-            border-radius: 10px;
+            padding: 15px 30px; /* Aumenta o padding para deixar o botão maior */
+            font-size: 20px; /* Aumenta o tamanho da fonte */
+            border-radius: 20px; /* Arredonda os cantos */
             cursor: pointer;
             margin-top: 20px;
+            transition: background-color 0.3s; /* Adiciona uma transição suave para a mudança de cor */
         }
 
         #check-btn:hover {
-            background-color: #45a049;
+            background-color: #45a049; /* Cor do botão ao passar o mouse */
         }
 
-        /* Resultado */
         #result {
             margin-top: 20px;
             font-size: 20px;
@@ -89,7 +92,6 @@
 
     <h1>Tons do vestido</h1>
     
-    <!-- Paleta de cores aqui (visual apenas) -->
     <div class="palette">
         <span style="background-color:rgb(55, 71, 48);"></span>
         <span style="background-color:rgb(76, 85, 59);"></span>
@@ -98,13 +100,12 @@
         <span style="background-color:rgb(188, 200, 161);"></span>
     </div>
 
-    <!-- Caixa para upload ou link -->
-    <div class="upload-box">
+    <div class="upload-box" id="upload-box">
         Arraste sua imagem ou coloque o link
         <br>
-        <input type="file" id="image-input">
-        <!-- Caso queira usar link ao invés de upload, ative este campo -->
-        <!-- <input type="url" id="image-link" placeholder="https://"> -->
+        <input type="file" id="image-input" style="display:none;">
+        <input type="text" id="image-link" placeholder="Cole o link da imagem aqui">
+        <img id="uploaded-img" alt="Imagem Carregada">
     </div>
 
     <button id="check-btn">E aí, combina?</button>
@@ -113,23 +114,20 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
-        // Paleta de cores do vestido em RGB
         const palette = [
-            { r: 55, g: 71, b: 48 },   // Primeiro tom
-            { r: 76, g: 85, b: 59 },   // Segundo tom
-            { r: 120, g: 134, b: 107 },// Terceiro tom
-            { r: 153, g: 168, b: 124 },// Quarto tom
-            { r: 188, g: 200, b: 161 } // Quinto tom
+            { r: 55, g: 71, b: 48 },
+            { r: 76, g: 85, b: 59 },
+            { r: 120, g: 134, b: 107 },
+            { r: 153, g: 168, b: 124 },
+            { r: 188, g: 200, b: 161 }
         ];
 
-        // Função para verificar se uma cor está dentro do range
         function colorMatches(color, paletteColor, tolerance = 20) {
             return Math.abs(color.r - paletteColor.r) <= tolerance &&
                 Math.abs(color.g - paletteColor.g) <= tolerance &&
                 Math.abs(color.b - paletteColor.b) <= tolerance;
         }
 
-        // Função para verificar se combina
         function checkColorCombination(imageColors) {
             for (let imageColor of imageColors) {
                 for (let paletteColor of palette) {
@@ -141,26 +139,38 @@
             return false; // Não combina
         }
 
-        // Função para pegar as cores da imagem com Color Thief
         function getImageColors(imgElement) {
             const colorThief = new ColorThief();
-            const dominantColor = colorThief.getColor(imgElement); // Pega a cor dominante
+            const dominantColor = colorThief.getColor(imgElement);
             return [
                 { r: dominantColor[0], g: dominantColor[1], b: dominantColor[2] }
             ];
         }
 
-        // Carregamento da imagem
-        const imageInput = document.getElementById('image-input');
+        // Função para lidar com o arrastar de arquivos
+        const uploadBox = document.getElementById('upload-box');
         const uploadedImg = document.getElementById('uploaded-img');
 
-        imageInput.addEventListener('change', function() {
-            const file = this.files[0];
+        uploadBox.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadBox.style.borderColor = "#4CAF50"; // Muda a borda ao arrastar
+        });
+
+        uploadBox.addEventListener('dragleave', function() {
+            uploadBox.style.borderColor = "#CCCCCC"; // Restaura a borda
+        });
+
+        uploadBox.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadBox.style.borderColor = "#CCCCCC"; // Restaura a borda
+
+            const file = e.dataTransfer.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     uploadedImg.src = event.target.result;
                     uploadedImg.style.display = 'block'; // Mostrar a imagem
+                    document.getElementById('image-link').value = ''; // Limpa o campo de link
                 };
                 reader.readAsDataURL(file);
             }
@@ -168,13 +178,22 @@
 
         // Quando o usuário clica no botão
         document.getElementById('check-btn').addEventListener('click', function() {
-            if (uploadedImg.complete && uploadedImg.src) {
-                const imageColors = getImageColors(uploadedImg); // Pega as cores da imagem
+            const link = document.getElementById('image-link').value;
+
+            if (link) {
+                uploadedImg.src = link; // Define a imagem com o link
+                uploadedImg.style.display = 'block'; // Mostra a imagem
+                const imageColors = getImageColors(uploadedImg);
+
+                const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
+                document.getElementById('result').textContent = result;
+            } else if (uploadedImg.complete && uploadedImg.src) {
+                const imageColors = getImageColors(uploadedImg);
 
                 const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
                 document.getElementById('result').textContent = result;
             } else {
-                alert('Por favor, carregue uma imagem primeiro.');
+                alert('Por favor, carregue uma imagem ou cole um link.');
             }
         });
 
