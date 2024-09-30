@@ -7,39 +7,107 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #F5F5F5;
             text-align: center;
             padding: 20px;
         }
-        img {
-            max-width: 300px;
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Estilizando os círculos de cor */
+        .palette {
+            margin-bottom: 30px;
+        }
+
+        .palette span {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Caixa de upload/link */
+        .upload-box {
+            background-color: #EDEDED;
+            border: 2px dashed #CCCCCC;
+            border-radius: 10px;
+            width: 300px;
+            height: 150px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #888888;
+            font-size: 16px;
+            padding: 20px;
+        }
+
+        /* Campo de link */
+        .upload-box input[type="file"],
+        .upload-box input[type="url"] {
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 8px;
+            width: 90%;
+            border: 1px solid #CCCCCC;
+            border-radius: 5px;
+        }
+
+        /* Botão "Combina?" */
+        #check-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
             margin-top: 20px;
         }
+
+        #check-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Resultado */
         #result {
             margin-top: 20px;
             font-size: 20px;
             font-weight: bold;
+            color: #333;
         }
+
     </style>
 </head>
 <body>
 
     <h1>Tons do vestido</h1>
+    
     <!-- Paleta de cores aqui (visual apenas) -->
-    <div>
-        <span style="display:inline-block; width:50px; height:50px; background-color:rgb(55, 71, 48);"></span>
-        <span style="display:inline-block; width:50px; height:50px; background-color:rgb(76, 85, 59);"></span>
-        <span style="display:inline-block; width:50px; height:50px; background-color:rgb(120, 134, 107);"></span>
-        <span style="display:inline-block; width:50px; height:50px; background-color:rgb(153, 168, 124);"></span>
-        <span style="display:inline-block; width:50px; height:50px; background-color:rgb(188, 200, 161);"></span>
+    <div class="palette">
+        <span style="background-color:rgb(55, 71, 48);"></span>
+        <span style="background-color:rgb(76, 85, 59);"></span>
+        <span style="background-color:rgb(120, 134, 107);"></span>
+        <span style="background-color:rgb(153, 168, 124);"></span>
+        <span style="background-color:rgb(188, 200, 161);"></span>
     </div>
 
-    <div>
+    <!-- Caixa para upload ou link -->
+    <div class="upload-box">
+        Arraste sua imagem ou coloque o link
+        <br>
         <input type="file" id="image-input">
-        <br>
-        <img id="uploaded-img" alt="">
-        <br>
-        <button id="check-btn">E aí, combina?</button>
+        <!-- Caso queira usar link ao invés de upload, ative este campo -->
+        <!-- <input type="url" id="image-link" placeholder="https://"> -->
     </div>
+
+    <button id="check-btn">E aí, combina?</button>
 
     <div id="result"></div>
 
