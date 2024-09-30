@@ -128,7 +128,7 @@
             { r: 188, g: 200, b: 161 }
         ];
 
-        function colorMatches(color, paletteColor, tolerance = 20) {
+        function colorMatches(color, paletteColor, tolerance = 30) {
             return Math.abs(color.r - paletteColor.r) <= tolerance &&
                 Math.abs(color.g - paletteColor.g) <= tolerance &&
                 Math.abs(color.b - paletteColor.b) <= tolerance;
@@ -138,7 +138,7 @@
             for (let imageColor of imageColors) {
                 for (let paletteColor of palette) {
                     if (colorMatches(imageColor, paletteColor)) {
-                        return true; // Combina!
+                        return true; // Combina
                     }
                 }
             }
@@ -189,3 +189,4 @@
     </script>
 </body>
 </html>
+ 
