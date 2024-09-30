@@ -135,8 +135,8 @@
         }
 
         function checkColorCombination(imageColors) {
-            for (let imageColor of imageColors) {
-                for (let paletteColor of palette) {
+            for (let paletteColor of palette) {
+                for (let imageColor of imageColors) {
                     if (colorMatches(imageColor, paletteColor)) {
                         return true; // Combina
                     }
@@ -147,10 +147,8 @@
 
         function getImageColors(imgElement) {
             const colorThief = new ColorThief();
-            const dominantColor = colorThief.getColor(imgElement);
-            return [
-                { r: dominantColor[0], g: dominantColor[1], b: dominantColor[2] }
-            ];
+            const colorPalette = colorThief.getPalette(imgElement, 5); // Obtém uma paleta de 5 cores da imagem
+            return colorPalette.map(color => ({ r: color[0], g: color[1], b: color[2] }));
         }
 
         const uploadBox = document.getElementById('upload-box');
@@ -189,4 +187,3 @@
     </script>
 </body>
 </html>
- 
