@@ -120,35 +120,37 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
+        // Paleta de cores do vestido em RGB
         const palette = [
-            { r: 55, g: 71, b: 48 },
-            { r: 76, g: 85, b: 59 },
-            { r: 120, g: 134, b: 107 },
-            { r: 153, g: 168, b: 124 },
-            { r: 188, g: 200, b: 161 }
+            { r: 55, g: 71, b: 48 },   // Primeiro tom
+            { r: 76, g: 85, b: 59 },   // Segundo tom
+            { r: 120, g: 134, b: 107 },// Terceiro tom
+            { r: 153, g: 168, b: 124 },// Quarto tom
+            { r: 188, g: 200, b: 161 } // Quinto tom
         ];
 
-        function colorMatches(color, paletteColor, tolerance = 30) {
+        // Função para verificar se uma cor está dentro do range
+        function colorMatches(color, paletteColor, tolerance = 10) {
             return Math.abs(color.r - paletteColor.r) <= tolerance &&
-                Math.abs(color.g - paletteColor.g) <= tolerance &&
-                Math.abs(color.b - paletteColor.b) <= tolerance;
+                   Math.abs(color.g - paletteColor.g) <= tolerance &&
+                   Math.abs(color.b - paletteColor.b) <= tolerance;
         }
 
+        // Função para verificar se pelo menos uma cor da imagem combina com a paleta
         function checkColorCombination(imageColors) {
-            for (let paletteColor of palette) {
-                for (let imageColor of imageColors) {
-                    if (colorMatches(imageColor, paletteColor)) {
-                        return true; // Combina
-                    }
-                }
-            }
-            return false; // Não combina
+            // Retorna verdadeiro se pelo menos uma cor da imagem combina com a paleta
+            return imageColors.some(imageColor => {
+                return palette.some(paletteColor => colorMatches(imageColor, paletteColor));
+            });
         }
 
+        // Função para pegar as cores da imagem com Color Thief
         function getImageColors(imgElement) {
             const colorThief = new ColorThief();
-            const colorPalette = colorThief.getPalette(imgElement, 5); // Obtém uma paleta de 5 cores da imagem
-            return colorPalette.map(color => ({ r: color[0], g: color[1], b: color[2] }));
+            const dominantColor = colorThief.getColor(imgElement);
+            return [
+                { r: dominantColor[0], g: dominantColor[1], b: dominantColor[2] }
+            ];
         }
 
         const uploadBox = document.getElementById('upload-box');
@@ -178,7 +180,7 @@
         document.getElementById('check-btn').addEventListener('click', function() {
             if (uploadedImg.complete && uploadedImg.src) {
                 const imageColors = getImageColors(uploadedImg);
-                const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
+                const result = checkColorCombination(imageColors) ? 'não combina' : 'sim, combina.';
                 document.getElementById('result').textContent = result;
             } else {
                 alert('Por favor, carregue uma imagem.');
