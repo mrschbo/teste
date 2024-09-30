@@ -56,11 +56,6 @@
             position: relative;
             border-radius: 10px;
             box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-            transition: transform 0.2s; /* Efeito suave para zoom */
-        }
-
-        .upload-box img:hover {
-            transform: scale(1.2); /* Aumenta a imagem ao passar o mouse */
         }
 
         #image-input {
@@ -121,11 +116,9 @@
                 };
                 reader.readAsDataURL(file);
             } else {
-                // Removido o alerta para evitar conflitos
-                // alert('Por favor, selecione uma imagem válida.');
+                alert('Por favor, selecione uma imagem válida.');
             }
         });
     </script>
 </body>
 </html>
- 
