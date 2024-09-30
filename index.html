@@ -134,7 +134,7 @@
         ];
 
         // Função para verificar se uma cor está dentro do range
-        function colorMatches(color, paletteColor, tolerance = 1) { // Tolerância ajustada para 1
+        function colorMatches(color, paletteColor, tolerance = 5) { // Tolerância ajustada para 5
             return Math.abs(color.r - paletteColor.r) <= tolerance &&
                    Math.abs(color.g - paletteColor.g) <= tolerance &&
                    Math.abs(color.b - paletteColor.b) <= tolerance;
@@ -166,15 +166,13 @@
                     uploadedImg.style.display = 'block'; 
                     uploadedImg.onload = function() {
                         // Inicializa o Cropper.js
+                        if (cropper) {
+                            cropper.destroy(); // Destrói o cropper existente se houver
+                        }
                         cropper = new Cropper(uploadedImg, {
                             aspectRatio: 1,
                             viewMode: 1,
                             autoCropArea: 1,
-                            ready: function () {
-                                // Exibe a imagem com o cropper
-                                uploadBox.style.height = 'auto'; // Ajusta a altura do upload-box com base na imagem
-                                uploadBox.style.padding = '0'; // Remove padding quando imagem está presente
-                            }
                         });
                     };
                 };
@@ -186,8 +184,8 @@
 
         document.getElementById('check-btn').addEventListener('click', function() {
             if (cropper) {
-                const canvas = document.getElementById('canvas');
-                const croppedImageDataURL = cropper.getCroppedCanvas().toDataURL();
+                const croppedCanvas = cropper.getCroppedCanvas();
+                const croppedImageDataURL = croppedCanvas.toDataURL();
                 const croppedImage = new Image();
                 croppedImage.src = croppedImageDataURL;
 
