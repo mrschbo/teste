@@ -69,14 +69,6 @@
             color: #333;
         }
 
-        #zoomed-area {
-            display: none;
-            position: absolute;
-            border: 2px solid #000;
-            z-index: 10;
-            pointer-events: none; /* Impede interações com a área de zoom */
-        }
-
         /* Media Queries para telas menores */
         @media (max-width: 600px) {
             h1 {
@@ -103,33 +95,12 @@
         <img id="uploaded-img" alt="Imagem Carregada">
     </div>
 
-    <div id="result">Dê zoom e compare com a paleta de cores</div>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <div id="zoomed-area"></div>
+    <div id="result">Verifique os tons, você pode dar zoom se quiser</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
-        // Paleta de cores do vestido em RGB
-        const palette = [
-            { r: 55, g: 71, b: 48 },   // Primeiro tom
-            { r: 76, g: 85, b: 59 },   // Segundo tom
-            { r: 120, g: 134, b: 107 },// Terceiro tom
-            { r: 153, g: 168, b: 124 },// Quarto tom
-            { r: 188, g: 200, b: 161 } // Quinto tom
-        ];
-
-        // Função para verificar se uma cor está dentro do range
-        function colorMatches(color, paletteColor, tolerance = 5) {
-            return Math.abs(color.r - paletteColor.r) <= tolerance &&
-                   Math.abs(color.g - paletteColor.g) <= tolerance &&
-                   Math.abs(color.b - paletteColor.b) <= tolerance;
-        }
-
         const uploadBox = document.getElementById('upload-box');
         const uploadedImg = document.getElementById('uploaded-img');
         const imageInput = document.getElementById('image-input');
-        const zoomedArea = document.getElementById('zoomed-area');
-        let zoomFactor = 3; // Fator de zoom
 
         uploadBox.addEventListener('click', function() {
             imageInput.click(); // Abre a caixa de diálogo para escolher a imagem
@@ -148,34 +119,6 @@
                 alert('Por favor, selecione uma imagem válida.');
             }
         });
-
-        uploadedImg.addEventListener('mousemove', function(event) {
-            const rect = uploadedImg.getBoundingClientRect();
-            const x = event.clientX - rect.left; // Coordenada X na imagem
-            const y = event.clientY - rect.top; // Coordenada Y na imagem
-
-            // Atualiza a posição da área de zoom
-            zoomedArea.style.display = 'block';
-            zoomedArea.style.left = `${event.pageX - 50}px`; // Ajuste para centralizar o zoom
-            zoomedArea.style.top = `${event.pageY - 50}px`;
-            zoomedArea.style.width = `${100}px`; // Largura da área de zoom
-            zoomedArea.style.height = `${100}px`; // Altura da área de zoom
-
-            // Atualiza a imagem de zoom
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 100 * zoomFactor;
-            canvas.height = 100 * zoomFactor;
-            ctx.drawImage(uploadedImg, x - 50, y - 50, 100, 100, 0, 0, canvas.width, canvas.height);
-            zoomedArea.style.backgroundImage = `url(${canvas.toDataURL()})`;
-            zoomedArea.style.backgroundSize = `${uploadedImg.width * zoomFactor}px ${uploadedImg.height * zoomFactor}px`;
-            zoomedArea.style.backgroundRepeat = 'no-repeat';
-        });
-
-        uploadedImg.addEventListener('mouseleave', function() {
-            zoomedArea.style.display = 'none'; // Esconde a área de zoom quando o mouse sai da imagem
-        });
     </script>
 </body>
 </html>
- 
