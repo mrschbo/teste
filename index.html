@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teste de Combinação de Cores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.15/cropper.min.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -118,6 +119,9 @@
 
     <div id="result"></div>
 
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.15/cropper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
         // Paleta de cores do vestido em RGB
@@ -130,7 +134,7 @@
         ];
 
         // Função para verificar se uma cor está dentro do range
-        function colorMatches(color, paletteColor, tolerance = 10) {
+        function colorMatches(color, paletteColor, tolerance = 1) { // Tolerância ajustada para 1
             return Math.abs(color.r - paletteColor.r) <= tolerance &&
                    Math.abs(color.g - paletteColor.g) <= tolerance &&
                    Math.abs(color.b - paletteColor.b) <= tolerance;
@@ -144,18 +148,10 @@
             });
         }
 
-        // Função para pegar as cores da imagem com Color Thief
-        function getImageColors(imgElement) {
-            const colorThief = new ColorThief();
-            const dominantColor = colorThief.getColor(imgElement);
-            return [
-                { r: dominantColor[0], g: dominantColor[1], b: dominantColor[2] }
-            ];
-        }
-
         const uploadBox = document.getElementById('upload-box');
         const uploadedImg = document.getElementById('uploaded-img');
         const imageInput = document.getElementById('image-input');
+        let cropper;
 
         uploadBox.addEventListener('click', function() {
             imageInput.click(); // Abre a caixa de diálogo para escolher a imagem
@@ -168,8 +164,19 @@
                 reader.onload = function(event) {
                     uploadedImg.src = event.target.result;
                     uploadedImg.style.display = 'block'; 
-                    uploadBox.style.height = 'auto'; // Ajusta a altura do upload-box com base na imagem
-                    uploadBox.style.padding = '0'; // Remove padding quando imagem está presente
+                    uploadedImg.onload = function() {
+                        // Inicializa o Cropper.js
+                        cropper = new Cropper(uploadedImg, {
+                            aspectRatio: 1,
+                            viewMode: 1,
+                            autoCropArea: 1,
+                            ready: function () {
+                                // Exibe a imagem com o cropper
+                                uploadBox.style.height = 'auto'; // Ajusta a altura do upload-box com base na imagem
+                                uploadBox.style.padding = '0'; // Remove padding quando imagem está presente
+                            }
+                        });
+                    };
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -178,10 +185,19 @@
         });
 
         document.getElementById('check-btn').addEventListener('click', function() {
-            if (uploadedImg.complete && uploadedImg.src) {
-                const imageColors = getImageColors(uploadedImg);
-                const result = checkColorCombination(imageColors) ? 'não combina' : 'sim, combina.';
-                document.getElementById('result').textContent = result;
+            if (cropper) {
+                const canvas = document.getElementById('canvas');
+                const croppedImageDataURL = cropper.getCroppedCanvas().toDataURL();
+                const croppedImage = new Image();
+                croppedImage.src = croppedImageDataURL;
+
+                croppedImage.onload = function() {
+                    const colorThief = new ColorThief();
+                    const dominantColor = colorThief.getColor(croppedImage);
+                    const imageColors = [{ r: dominantColor[0], g: dominantColor[1], b: dominantColor[2] }];
+                    const result = checkColorCombination(imageColors) ? 'sim, combina!' : 'não combina';
+                    document.getElementById('result').textContent = result;
+                };
             } else {
                 alert('Por favor, carregue uma imagem.');
             }
