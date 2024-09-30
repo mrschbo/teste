@@ -10,10 +10,11 @@
             background-color: #F5F5F5;
             text-align: center;
             padding: 20px;
+            margin: 0;
         }
 
         h1 {
-            font-size: 24px;
+            font-size: 2rem;
             margin-bottom: 20px;
         }
 
@@ -34,36 +35,48 @@
             background-color: #EDEDED;
             border: 2px dashed #CCCCCC;
             border-radius: 10px;
-            width: 300px;
-            height: 150px;
+            width: 90%;
+            max-width: 400px;
             margin: 0 auto 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             color: #888888;
-            font-size: 16px;
+            font-size: 1rem;
             padding: 20px;
+            position: relative;
+            min-height: 150px; /* Altura mínima */
         }
 
         .upload-box img {
             display: none; /* Oculta a imagem inicialmente */
             max-width: 100%;
-            margin-top: 10px;
-            border: 2px solid #CCCCCC;
-            border-radius: 5px;
+            height: auto; /* Ajusta a altura da imagem proporcionalmente */
+            position: relative;
+            border-radius: 10px;
             box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #image-link {
+            width: 80%; /* Ajusta a largura do campo de link */
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #CCCCCC;
+            display: none; /* Esconde o campo de link inicialmente */
         }
 
         #check-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 18px;
-            border-radius: 10px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 20px;
             cursor: pointer;
             margin-top: 20px;
+            transition: background-color 0.3s;
         }
 
         #check-btn:hover {
@@ -72,11 +85,20 @@
 
         #result {
             margin-top: 20px;
-            font-size: 20px;
+            font-size: 1.2rem;
             font-weight: bold;
             color: #333;
         }
 
+        /* Media Queries para telas menores */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            #check-btn {
+                padding: 10px 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -92,11 +114,12 @@
     </div>
 
     <div class="upload-box" id="upload-box">
-        Arraste sua imagem
-        <br>
-        <input type="file" id="image-input">
+        <div>Arraste sua imagem aqui</div>
+        <input type="file" id="image-input" style="display:none;">
         <img id="uploaded-img" alt="Imagem Carregada">
     </div>
+
+    <input type="text" id="image-link" placeholder="Cole o link da imagem aqui">
 
     <button id="check-btn">E aí, combina?</button>
 
@@ -137,46 +160,75 @@
             ];
         }
 
-        // Função para lidar com o arrastar de arquivos
         const uploadBox = document.getElementById('upload-box');
         const uploadedImg = document.getElementById('uploaded-img');
+        const imageLink = document.getElementById('image-link');
 
         uploadBox.addEventListener('dragover', function(e) {
             e.preventDefault();
-            uploadBox.style.borderColor = "#4CAF50"; // Muda a borda ao arrastar
+            uploadBox.style.borderColor = "#4CAF50"; 
         });
 
         uploadBox.addEventListener('dragleave', function() {
-            uploadBox.style.borderColor = "#CCCCCC"; // Restaura a borda
+            uploadBox.style.borderColor = "#CCCCCC"; 
         });
 
         uploadBox.addEventListener('drop', function(e) {
             e.preventDefault();
-            uploadBox.style.borderColor = "#CCCCCC"; // Restaura a borda
+            uploadBox.style.borderColor = "#CCCCCC"; 
 
             const file = e.dataTransfer.files[0];
-            if (file) {
+            if (file && file.type.startsWith('image/')) { 
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     uploadedImg.src = event.target.result;
-                    uploadedImg.style.display = 'block'; // Mostrar a imagem
+                    uploadedImg.style.display = 'block'; 
+                    uploadBox.style.height = 'auto'; // Ajusta a altura do upload-box com base na imagem
+                    uploadBox.style.padding = '0'; // Remove padding quando imagem está presente
                 };
                 reader.readAsDataURL(file);
+            } else {
+                alert('Por favor, arraste uma imagem válida.');
             }
         });
 
-        // Quando o usuário clica no botão
+        function toggleInputMethod(method) {
+            if (method === 'link') {
+                uploadBox.style.display = 'none'; 
+                imageLink.style.display = 'block'; 
+            } else {
+                uploadBox.style.display = 'flex'; 
+                imageLink.style.display = 'none'; 
+            }
+        }
+
+        uploadBox.addEventListener('click', function() {
+            toggleInputMethod('upload');
+        });
+
+        imageLink.addEventListener('focus', function() {
+            toggleInputMethod('link');
+        });
+
         document.getElementById('check-btn').addEventListener('click', function() {
             if (uploadedImg.complete && uploadedImg.src) {
                 const imageColors = getImageColors(uploadedImg);
-
                 const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
                 document.getElementById('result').textContent = result;
+            } else if (imageLink.style.display === 'block' && imageLink.value) {
+                uploadedImg.src = imageLink.value; 
+                uploadedImg.style.display = 'block'; 
+
+                uploadedImg.onload = function() {
+                    uploadBox.style.height = 'auto'; // Ajusta o tamanho do upload-box quando a imagem do link é carregada
+                    const imageColors = getImageColors(uploadedImg);
+                    const result = checkColorCombination(imageColors) ? 'Sim, combina!' : 'Não, não combina.';
+                    document.getElementById('result').textContent = result;
+                };
             } else {
-                alert('Por favor, carregue uma imagem primeiro.');
+                alert('Por favor, carregue uma imagem ou cole um link.');
             }
         });
-
     </script>
 </body>
 </html>
