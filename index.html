@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teste de Combinação de Cores</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.15/cropper.min.css" />
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,22 +62,6 @@
             display: none; /* Oculta o input de arquivo */
         }
 
-        #check-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            border-radius: 20px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-
-        #check-btn:hover {
-            background-color: #45a049;
-        }
-
         #result {
             margin-top: 20px;
             font-size: 1.2rem;
@@ -86,13 +69,18 @@
             color: #333;
         }
 
+        #zoomed-area {
+            display: none;
+            position: absolute;
+            border: 2px solid #000;
+            z-index: 10;
+            pointer-events: none; /* Impede interações com a área de zoom */
+        }
+
         /* Media Queries para telas menores */
         @media (max-width: 600px) {
             h1 {
                 font-size: 1.5rem;
-            }
-            #check-btn {
-                padding: 10px 20px;
             }
         }
     </style>
@@ -115,13 +103,10 @@
         <img id="uploaded-img" alt="Imagem Carregada">
     </div>
 
-    <button id="check-btn">E aí, combina?</button>
-
-    <div id="result"></div>
-
+    <div id="result">Dê zoom e compare com a paleta de cores</div>
     <canvas id="canvas" style="display:none;"></canvas>
+    <div id="zoomed-area"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.15/cropper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script>
         // Paleta de cores do vestido em RGB
@@ -134,24 +119,17 @@
         ];
 
         // Função para verificar se uma cor está dentro do range
-        function colorMatches(color, paletteColor, tolerance = 5) { // Tolerância ajustada para 5
+        function colorMatches(color, paletteColor, tolerance = 5) {
             return Math.abs(color.r - paletteColor.r) <= tolerance &&
                    Math.abs(color.g - paletteColor.g) <= tolerance &&
                    Math.abs(color.b - paletteColor.b) <= tolerance;
         }
 
-        // Função para verificar se pelo menos uma cor da imagem combina com a paleta
-        function checkColorCombination(imageColors) {
-            // Retorna verdadeiro se pelo menos uma cor da imagem combina com a paleta
-            return imageColors.some(imageColor => {
-                return palette.some(paletteColor => colorMatches(imageColor, paletteColor));
-            });
-        }
-
         const uploadBox = document.getElementById('upload-box');
         const uploadedImg = document.getElementById('uploaded-img');
         const imageInput = document.getElementById('image-input');
-        let cropper;
+        const zoomedArea = document.getElementById('zoomed-area');
+        let zoomFactor = 3; // Fator de zoom
 
         uploadBox.addEventListener('click', function() {
             imageInput.click(); // Abre a caixa de diálogo para escolher a imagem
@@ -164,17 +142,6 @@
                 reader.onload = function(event) {
                     uploadedImg.src = event.target.result;
                     uploadedImg.style.display = 'block'; 
-                    uploadedImg.onload = function() {
-                        // Inicializa o Cropper.js
-                        if (cropper) {
-                            cropper.destroy(); // Destrói o cropper existente se houver
-                        }
-                        cropper = new Cropper(uploadedImg, {
-                            aspectRatio: 1,
-                            viewMode: 1,
-                            autoCropArea: 1,
-                        });
-                    };
                 };
                 reader.readAsDataURL(file);
             } else {
@@ -182,23 +149,31 @@
             }
         });
 
-        document.getElementById('check-btn').addEventListener('click', function() {
-            if (cropper) {
-                const croppedCanvas = cropper.getCroppedCanvas();
-                const croppedImageDataURL = croppedCanvas.toDataURL();
-                const croppedImage = new Image();
-                croppedImage.src = croppedImageDataURL;
+        uploadedImg.addEventListener('mousemove', function(event) {
+            const rect = uploadedImg.getBoundingClientRect();
+            const x = event.clientX - rect.left; // Coordenada X na imagem
+            const y = event.clientY - rect.top; // Coordenada Y na imagem
 
-                croppedImage.onload = function() {
-                    const colorThief = new ColorThief();
-                    const dominantColor = colorThief.getColor(croppedImage);
-                    const imageColors = [{ r: dominantColor[0], g: dominantColor[1], b: dominantColor[2] }];
-                    const result = checkColorCombination(imageColors) ? 'sim, combina!' : 'não combina';
-                    document.getElementById('result').textContent = result;
-                };
-            } else {
-                alert('Por favor, carregue uma imagem e faça o corte.');
-            }
+            // Atualiza a posição da área de zoom
+            zoomedArea.style.display = 'block';
+            zoomedArea.style.left = `${event.pageX - 50}px`; // Ajuste para centralizar o zoom
+            zoomedArea.style.top = `${event.pageY - 50}px`;
+            zoomedArea.style.width = `${100}px`; // Largura da área de zoom
+            zoomedArea.style.height = `${100}px`; // Altura da área de zoom
+
+            // Atualiza a imagem de zoom
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 100 * zoomFactor;
+            canvas.height = 100 * zoomFactor;
+            ctx.drawImage(uploadedImg, x - 50, y - 50, 100, 100, 0, 0, canvas.width, canvas.height);
+            zoomedArea.style.backgroundImage = `url(${canvas.toDataURL()})`;
+            zoomedArea.style.backgroundSize = `${uploadedImg.width * zoomFactor}px ${uploadedImg.height * zoomFactor}px`;
+            zoomedArea.style.backgroundRepeat = 'no-repeat';
+        });
+
+        uploadedImg.addEventListener('mouseleave', function() {
+            zoomedArea.style.display = 'none'; // Esconde a área de zoom quando o mouse sai da imagem
         });
     </script>
 </body>
